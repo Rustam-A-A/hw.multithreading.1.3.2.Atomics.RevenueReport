@@ -8,43 +8,30 @@ public class Main {
 
     public static void main(String[] args) throws InterruptedException {
 
+        //формирование массивов данных продаж трех магазинов
         Revenue shop1 = new Revenue(4, 100);
+        int[] report1 = shop1.formShopReport();
         Revenue shop2 = new Revenue(3, 80);
+        int[] report2 = shop2.formShopReport();
         Revenue shop3 = new Revenue(1, 210);
+        int[] report3 = shop3.formShopReport();
 
-        int[] revenue1 = shop1.formShopReport();
-        int[] revenue2 = shop2.formShopReport();
-        int[] revenue3 = shop3.formShopReport();
+        //получение величины итоговой выручки по трем магазинам
+        LongAdder revenueTotalResult = new LongAdder();
 
-        LongAdder stat = new LongAdder();
+        formReport(report1, revenueTotalResult);
+        formReport(report2, revenueTotalResult);
+        formReport(report3, revenueTotalResult);
 
-        formReport(revenue1, stat);
-        formReport(revenue2, stat);
-        formReport(revenue3, stat);
-
-        System.out.println("\nTotal Result " + stat.sum() + "\n");
-
-        //alternative result checking
-        checkShopReport (revenue1);
-        checkShopReport (revenue2);
-        checkShopReport (revenue3);
+        System.out.println("\nTotal Result " + revenueTotalResult.sum() + "\n");
     }
 
-    public static void formReport(int[] revenue, LongAdder stat) throws InterruptedException {
+    public static void formReport(int[] report, LongAdder stat) throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        IntStream.range(0, revenue.length)
-                .forEach(i -> executorService.submit(() -> stat.add(revenue[i])));
+        IntStream.range(0, report.length)
+                .forEach(i -> executorService.submit(() -> stat.add(report[i])));
         executorService.awaitTermination(1, TimeUnit.SECONDS);
         executorService.shutdown();
     }
-
-    //checking if the result makes sense
-    public static void checkShopReport (int[] revenue){
-        for (int i = 0; i < revenue.length; i++){
-            System.out.println(revenue[i]);
-        }
-        System.out.println(DailyEarnings.getTotal(revenue) + "\n");
-    }
-
 
 }
